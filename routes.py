@@ -21,6 +21,11 @@ def load_user(user_id):
 
 app = create_app()
 
+@app.before_request
+def session_handler():
+    session.permanent = True
+    app.permanent_session_lifetime = timedelta(minutes=1)
+
 
 
 @app.route("/login/", methods=("GET", "POST"), strict_slashes=False)
@@ -68,17 +73,39 @@ def register():
             flash(f"Account Succesfully created", "success")
             return redirect(url_for("login"))
 
-        
+        except InvalidRequestError:
+            db.session.rollback()
+            flash(f"Something went wrong!", "danger")
+        except IntegrityError:
+            db.session.rollback()
+            flash(f"User already exists!.", "warning")
+        except DataError:
+            db.session.rollback()
+            flash(f"Invalid Entry", "warning")
+        except InterfaceError:
+            db.session.rollback()
+            flash(f"Error connecting to the database", "danger")
+        except DatabaseError:
+            db.session.rollback()
+            flash(f"Error connecting to the database", "danger")
+        except BuildError:
+            db.session.rollback()
+            flash(f"An error occured !", "danger")
     return render_template("auth.html",
-        
+        form=form,
+        text="Create account",
+        title="Register",
+        btn_action="Register account"
+        )
 
 @app.route("/logout")
 @login_required
 def logout():
     logout_user()
     return redirect(url_for('login'))
+# CRUD
 
-
+oauth = OAuth(app)
 
 @app.route('/auth')
 def main_route():
@@ -87,7 +114,24 @@ def main_route():
 @app.route('/create/', methods=('GET', 'POST'))
 def create():
     if request.method == 'POST':
-        
+        car_name = request.form['car_name']
+        car_id = request.form['car_id']
+        img = request.files['img']
+        desc = request.form['description']
+        price = request.form['model']
+        if not id:
+            flash('Title is required!')
+        elif not car_name:
+            flash('Content is required!')
+        else:
+            conn = get_db_connection()
+            filename = secure_filename(img.filename)
+            img.save(os.path.join(app.root_path, 'static/uploads', filename))
+            # print('upload_image filename: ' + filename)
+            conn.execute('INSERT INTO car (car_id, car_name, img, description, model) VALUES (?,?,?,?,?)',
+                         (car_id, car_name, filename, desc, price))
+            conn.commit()
+            conn.close()
             return redirect(url_for('list'))
 
     return render_template('createpage.html')
@@ -95,13 +139,23 @@ def create():
 @app.route('/display/<filename>')
 def display_image(filename):
     #print('display_image filename: ' + filename)
-    #return redirect(url_for('static', filename='uploads/' + filename), code=301)
+    return redirect(url_for('static', filename='uploads/' + filename), code=301)
 
 
-
+def get_car(id):
+    conn = get_db_connection()
+    car = conn.execute('SELECT * FROM car WHERE id = ?',
+                       (id,)).fetchone()
+    conn.close()
+    if car is None:
+        abort(404)
+    return car
 
 @app.route('/cart/<int:id>')
 def add_to_cart(id):
+    car = get_car(id)
+    current_user.wish = car['img']
+    db.session.commit()
     return redirect(url_for('main_route'))
 
 
@@ -112,7 +166,22 @@ def edit(id, ):
     car = get_car(id)
 
     if request.method == 'POST':
-        
+        car_id = request.form['car_id']
+        car_name = request.form['car_name']
+        price = request.form['model']
+        desc = request.form['description']
+        if not car_id:
+            flash('Title is required!')
+        elif not car_name:
+            flash('Content is required!')
+        else:
+
+            conn = get_db_connection()
+            conn.execute('UPDATE car SET car_id = ?, car_name = ?, model=?, description=?'
+                         ' WHERE id = ?',
+                         (car_id, car_name, price,desc,id,))
+            conn.commit()
+            conn.close()
             return redirect(url_for('list'))
 
     return render_template('edit.html', car=car)
@@ -126,11 +195,22 @@ def get_db_connection():
 
 @app.route('/<int:id>/delete/', methods=('POST', 'GET'))
 def delete(id):
+    car = get_car(id)
+    conn = get_db_connection()
+    conn.execute('DELETE FROM car WHERE id = ?', (id,))
+    print("deleted")
+    conn.commit()
+    conn.close()
+
+    flash('"{}" was successfully deleted!'.format(car['id']))
+    return redirect(url_for('list'))
 
 
 @app.route('/')
 def list():  # put application's code here
-    
+    conn = get_db_connection()
+    cars = conn.execute('SELECT * FROM car').fetchall()
+    conn.close()
     return render_template('cars.html', cars=cars)
 
 
