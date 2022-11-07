@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block content %}
+    {% if current_user.is_admin %}
+         <div class="container">
+        <div class="row">
+            <form method="post" enctype="multipart/form-data">
+        <label for="title">Car ID Unique Code</label>
+        <br>
+        <input type="text" name="car_id"
+               placeholder="Car Code"
+               value="{{ request.form['car_id'] }}"></input>
+        <br>
+
+        <label for="content">Car Details</label>
+        <br>
+        <input name="car_name"
+                  placeholder="Car Model"
+                  >{{ request.form['car_name'] }}</input>
+        <br>
+                <br>
+                <h3>Image of Car</h3>
+         <input type="file" name="img"
+               value="{{ request.form['img'] }}"></input>
+        <br>
+                <br>
+                <input type="text" name="description" placeholder="Description"
+               value="{{ request.form['description'] }}"></input>
+                <br>
+                <br>
+
+                <input type="text" name="model" placeholder="Range Price"
+               value="{{ request.form['model'] }}"></input>
+                <br>
+                <br>
+        <button type="submit">Submit</button>
+    </form>
+        </div>
+    </div>
+    {% endif %}
+
+
+{% endblock %}

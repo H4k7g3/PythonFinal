@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<!-- end header inner -->
+<!-- end header -->
+<!-- banner -->
+<section class="banner_main">
+	<div class="container">
+		<div class="row d_flex">
+			<div class="col-md-12">
+				<div class="text-bg">
+					<h1>Find Your Future Car Here</h1>
+					<span>Car Store 2022</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+</div>
+<!-- end banner -->
+<!-- car -->
+<div class="car">
+	<div class="container">
+		<div class="row">
+			<div class="col-md-12">
+				<div class="titlepage">
+					<h2>VARIETY OF CARS </h2>
+					<span>You can choose which one you like best</span>
+				</div>
+			</div>
+		</div>
+
+
+		<div class="row">
+			{% for car in cars %}
+
+			<div class="col-md-4 padding_leri">
+				<div class="car_box">
+					<a href="{{ url_for('description', id=car['id']) }}">
+						<figure><img src="{{ url_for('display_image',filename = car['img']) }}" alt="#" /></figure>
+						<h3>
+							{{ car['car_name'] }}</h3>
+					</a>
+				</div>
+			</div>
+			{% endfor %}
+
+		</div>
+
+	</div>
+</div>
+<!-- end car -->
+
+<!-- choose  section -->
+<div class="choose ">
+	<div class="container">
+		<div class="row">
+			<div class="col-md-12">
+				<div class="titlepage">
+					<h2>Why Choose Us</h2>
+					<span>It is a long established fact that a reader will be distracted by the readable content of a
+						page when<br> looking at its layout. The point of using </span>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-12">
+				<div class="choose_box">
+					<span>01</span>
+					<p>It is a long established fact that a reader will be distracted by the readable content of a page
+						when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal
+						distribution of letters, as opposed to using 'Content here, content here', making </p>
+				</div>
+			</div>
+			<div class="col-md-12">
+				<div class="choose_box">
+					<span>02</span>
+					<p>It is a long established fact that a reader will be distracted by the readable content of a page
+						when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal
+						distribution of letters, as opposed to using 'Content here, content here', making </p>
+				</div>
+			</div>
+			<div class="col-md-12">
+				<div class="choose_box">
+					<span>03</span>
+					<p>It is a long established fact that a reader will be distracted by the readable content of a page
+						when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal
+						distribution of letters, as opposed to using 'Content here, content here', making </p>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- end choose  section -->
+
+<!--  footer -->
+
+{% endblock %}
